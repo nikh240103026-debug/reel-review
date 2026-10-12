@@ -1,0 +1,103 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-panel: var(--panel);
+  --color-subtle: var(--subtle);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-ai: var(--ai);
+  --color-client: var(--client);
+  --color-editor: var(--editor);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+/* Single, dark charcoal theme (production review tools are viewed in dark rooms). */
+:root,
+.dark {
+  --background: oklch(0.165 0.003 285);
+  --foreground: oklch(0.94 0.004 285);
+  --card: oklch(0.195 0.004 285);
+  --card-foreground: oklch(0.94 0.004 285);
+  --panel: oklch(0.18 0.004 285);
+  --subtle: oklch(0.225 0.005 285);
+  --popover: oklch(0.21 0.005 285);
+  --popover-foreground: oklch(0.94 0.004 285);
+  --primary: oklch(0.64 0.16 278);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.25 0.006 285);
+  --secondary-foreground: oklch(0.93 0.004 285);
+  --muted: oklch(0.24 0.005 285);
+  --muted-foreground: oklch(0.66 0.012 285);
+  --accent: oklch(0.26 0.007 285);
+  --accent-foreground: oklch(0.96 0.004 285);
+  --destructive: oklch(0.66 0.19 22);
+  --success: oklch(0.72 0.15 155);
+  --warning: oklch(0.8 0.14 80);
+  --info: oklch(0.72 0.12 235);
+  --ai: oklch(0.74 0.14 300);
+  --client: oklch(0.78 0.12 200);
+  --editor: oklch(0.8 0.13 85);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 11%);
+  --ring: oklch(0.64 0.16 278 / 60%);
+  --radius: 0.5rem;
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "tnum" 0;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  ::selection {
+    background: oklch(0.64 0.16 278 / 35%);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(1 0 0 / 14%) transparent;
+  }
+}
+
+/* Video timeline scrubber */
+.timeline-track {
+  touch-action: none;
+}
