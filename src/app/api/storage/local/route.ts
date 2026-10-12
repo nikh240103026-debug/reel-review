@@ -8,7 +8,7 @@ import { objectPath, readMeta, verifyLocal, writePartFile, writeWholeObject } fr
 /**
  * LOCAL DEVELOPMENT MODE storage endpoint (emulates presigned S3 URLs).
  * Every request must carry a valid, unexpired HMAC signature. Disabled when
- * the S3/R2 driver is active.
+ * the S3-compatible storage driver is active.
  */
 
 function deny(status: number, error: string) {

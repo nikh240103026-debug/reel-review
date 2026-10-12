@@ -2,6 +2,7 @@ import "server-only";
 import { getDb, type Queryable } from "@/lib/db";
 import { env } from "@/lib/env";
 import { randomToken } from "@/lib/crypto";
+import { formatBytes } from "@/lib/format";
 import { badRequest, conflict, notFound } from "@/lib/http";
 import { getStorage, choosePartSize, extensionFor, type UploadedPart } from "@/lib/storage";
 import { recordActivity } from "./activity";
@@ -133,7 +134,7 @@ export interface StartUploadInput {
 export async function startUpload(input: StartUploadInput, actor: string) {
   if (input.sizeBytes <= 0) throw badRequest("File is empty");
   if (input.sizeBytes > env.maxUploadBytes) {
-    throw badRequest(`File exceeds the ${Math.round(env.maxUploadBytes / 1024 ** 3)} GB upload limit`);
+    throw badRequest(`File exceeds the ${formatBytes(env.maxUploadBytes)} upload limit`);
   }
   const contentType = normalizeVideoType(input.filename, input.contentType);
   const db = await getDb();

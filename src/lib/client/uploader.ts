@@ -121,7 +121,7 @@ async function putWithRetry(url: string, body: Blob, signal?: AbortSignal, conte
       if (!res.ok) throw new Error(`Storage responded ${res.status}`);
       const etag = res.headers.get("ETag") ?? res.headers.get("etag");
       if (!etag && !contentType) {
-        throw new Error("Storage did not expose the ETag header. Configure bucket CORS to expose ETag.");
+        throw new Error("Storage did not expose the ETag header. Configure the provider's CORS policy to expose ETag.");
       }
       return etag ?? "";
     } catch (err) {

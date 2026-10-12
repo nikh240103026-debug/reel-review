@@ -77,7 +77,7 @@ export const env = {
         throw new ConfigError("Vercel production requires S3-compatible object storage; local filesystem storage is not durable.");
       }
       if (!s3.bucket || !s3.accessKeyId || !s3.secretAccessKey || !s3.endpoint) {
-        throw new ConfigError("Configure R2_ACCOUNT_ID, S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY for Vercel production.");
+        throw new ConfigError("Configure S3_ENDPOINT (or R2_ACCOUNT_ID), S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY for Vercel production.");
       }
       return "s3";
     }
@@ -102,6 +102,17 @@ export const env = {
     return Math.min(Math.max(int("SIGNED_URL_TTL_SECONDS", 3600), 60), 7 * 24 * 3600);
   },
   get maxUploadBytes(): number {
+    const maxUploadMb = str("MAX_UPLOAD_MB");
+    if (maxUploadMb) {
+      const parsed = Number(maxUploadMb);
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        throw new ConfigError("MAX_UPLOAD_MB must be a positive number.");
+      }
+      return Math.floor(parsed * 1024 * 1024);
+    }
+    if (this.s3.endpoint && new URL(this.s3.endpoint).hostname.endsWith(".supabase.co")) {
+      return 50 * 1024 * 1024;
+    }
     return int("MAX_UPLOAD_GB", 20) * 1024 * 1024 * 1024;
   },
 

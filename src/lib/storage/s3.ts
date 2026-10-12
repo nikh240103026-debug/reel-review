@@ -15,17 +15,18 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env, ConfigError } from "@/lib/env";
 import type { StorageProvider, UploadedPart } from "./types";
 
-/** Cloudflare R2 or any S3-compatible bucket. The bucket must be private. */
+/** Any S3-compatible object store. The bucket must be private. */
 export function createS3Storage(): StorageProvider {
   const cfg = env.s3;
   if (!cfg.bucket || !cfg.accessKeyId || !cfg.secretAccessKey) {
-    throw new ConfigError("S3/R2 storage selected but S3_BUCKET, S3_ACCESS_KEY_ID or S3_SECRET_ACCESS_KEY is missing.");
+    throw new ConfigError("S3-compatible storage selected but S3_BUCKET, S3_ACCESS_KEY_ID or S3_SECRET_ACCESS_KEY is missing.");
   }
   const bucket = cfg.bucket;
   const client = new S3Client({
     region: cfg.region,
     endpoint: cfg.endpoint,
     forcePathStyle: cfg.forcePathStyle,
+    requestChecksumCalculation: "WHEN_REQUIRED",
     credentials: { accessKeyId: cfg.accessKeyId, secretAccessKey: cfg.secretAccessKey },
   });
   const ttl = (s?: number) => s ?? env.signedUrlTtlSeconds;

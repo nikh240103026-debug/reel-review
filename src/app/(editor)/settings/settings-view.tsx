@@ -59,7 +59,7 @@ export function SettingsView({ status, devices: initialDevices }: { status: Syst
       <Section title={<span className="flex items-center gap-2"><HardDrive className="size-4" /> Video storage</span>}>
         <div className="divide-y">
           <Row label="Driver">
-            {status.storage.driver === "s3" ? "S3-compatible (Cloudflare R2)" : "Local filesystem"}{" "}
+            {status.storage.driver === "s3" ? "S3-compatible object storage" : "Local filesystem"}{" "}
             {status.storage.mode === "local_dev" && <Pill tone="warning">Local development mode</Pill>}
           </Row>
           <Row label="Location">{status.storage.description}</Row>
@@ -70,7 +70,7 @@ export function SettingsView({ status, devices: initialDevices }: { status: Syst
         </div>
         {status.storage.mode === "local_dev" && (
           <p className="border-t px-4 py-2.5 text-xs text-muted-foreground">
-            Files are stored on this server&apos;s disk. Set S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY and R2_ACCOUNT_ID for Cloudflare R2 in production.
+            Files are stored on this server&apos;s disk. Configure S3_ENDPOINT, S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY for durable object storage in production.
           </p>
         )}
       </Section>

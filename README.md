@@ -28,10 +28,28 @@ require `ffmpeg`.
 
 Vercel functions do not provide the durable shared disk this app's local
 development database and storage need. Use Supabase PostgreSQL and a private
-Cloudflare R2 bucket for durable state and video files.
+S3-compatible object store for durable state and video files. Supabase Storage
+can serve both PostgreSQL and object storage; Cloudflare R2 is an alternative
+if its billing setup works for you.
 
-1. Create a Supabase project and a private R2 bucket. Create R2 API credentials
-   with access to that bucket.
+1. Create a Supabase project and a private Storage bucket. In Supabase Storage
+   settings, enable S3 access and create an S3 access-key pair. Copy the S3
+   endpoint and project region shown there. Follow Supabase's [S3
+   authentication](https://supabase.com/docs/guides/storage/s3/authentication)
+   and [S3 compatibility](https://supabase.com/docs/guides/storage/s3/compatibility)
+   guides. Supabase S3 access keys grant
+   project-wide Storage access and bypass Storage RLS, so use them only on the
+   server; never expose them to browsers or commit them. The app issues
+   short-lived, object-specific signed URLs to the browser for transfers.
+   Supabase's S3 API supports multipart uploads and presigned URLs.
+
+   For Supabase Free, the maximum individual file size is 50 MB. The app
+   automatically uses a 50 MiB upload limit when the endpoint is on
+   `*.supabase.co`. Set `MAX_UPLOAD_MB` to the file limit configured for your
+   project/bucket if your plan supports a higher value. Supabase's Free plan
+   also has a total Storage quota; check its [current Storage
+   limits](https://supabase.com/docs/guides/storage/uploads/file-limits) before
+   using it for a large video library.
 2. Apply the database migrations with `npm run db:migrate` using the Supabase
    connection URL from Project Settings → Database. Use the pooler URL when
    appropriate for serverless connections.
@@ -43,22 +61,27 @@ Cloudflare R2 bucket for durable state and video files.
    APP_SECRET=<at least 32 random characters>
    EDITOR_ACCESS_KEY=<at least 16 private characters>
    DATABASE_URL=<Supabase PostgreSQL connection URL>
-   R2_ACCOUNT_ID=<Cloudflare account ID>
-   S3_BUCKET=<private R2 bucket name>
-   S3_ACCESS_KEY_ID=<R2 access key ID>
-   S3_SECRET_ACCESS_KEY=<R2 secret access key>
+   S3_ENDPOINT=<Supabase Storage S3 endpoint>
+   S3_REGION=<Supabase project region>
+   S3_FORCE_PATH_STYLE=true
+   S3_BUCKET=<private Supabase Storage bucket name>
+   S3_ACCESS_KEY_ID=<Supabase Storage S3 access key ID>
+   S3_SECRET_ACCESS_KEY=<Supabase Storage S3 secret access key>
+   MAX_UPLOAD_MB=50
    ```
 
    Generate new private values for `APP_SECRET` and `EDITOR_ACCESS_KEY`; do not
    use values from `.env.example` or commit them. Configure these variables
    directly in Vercel—never paste secrets into source control or chat.
-4. Configure the R2 bucket's CORS policy to allow the deployed app origin to
-   `GET`, `HEAD`, and `PUT` objects, allow the `Range` request header, and expose
-   `ETag`, `Content-Range`, and `Accept-Ranges`. This is needed for multipart
-   uploads and video seeking.
+4. If using Cloudflare R2 instead of Supabase Storage, configure the bucket's
+   CORS policy to allow the deployed app origin to `GET`, `HEAD`, and `PUT`
+   objects, allow the `Range` request header, and expose `ETag`,
+   `Content-Range`, and `Accept-Ranges`. Set `R2_ACCOUNT_ID`, `S3_BUCKET`,
+   `S3_ACCESS_KEY_ID`, and `S3_SECRET_ACCESS_KEY`; `S3_ENDPOINT` is derived from
+   the account ID.
 5. Redeploy after setting the variables. Vercel production now rejects missing
-   public URL, PostgreSQL, or S3/R2 configuration instead of silently using
-   localhost links or ephemeral local storage.
+   public URL, PostgreSQL, or S3-compatible storage configuration instead of
+   silently using localhost links or ephemeral local storage.
 
 Add `ANTHROPIC_API_KEY` in Vercel only if Claude-powered review is required;
 without it, the app uses its labelled offline draft mode. See `.env.example`
