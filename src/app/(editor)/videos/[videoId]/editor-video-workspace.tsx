@@ -20,15 +20,17 @@ export function EditorVideoWorkspace({
   videoId,
   projectId,
   projectName,
-  claudeConfigured,
-  claudeModel,
+  aiConfigured,
+  aiModel,
+  aiProvider,
   activeAdapters,
 }: {
   videoId: string;
   projectId: string;
   projectName: string;
-  claudeConfigured: boolean;
-  claudeModel: string;
+  aiConfigured: boolean;
+  aiModel: string;
+  aiProvider: "gemini" | "claude" | undefined;
   activeAdapters: string[];
 }) {
   const [share, setShare] = useState(false);
@@ -78,8 +80,9 @@ export function EditorVideoWorkspace({
               onOpenChange={setAiOpen}
               ctx={ctx}
               videoId={videoId}
-              claudeConfigured={claudeConfigured}
-              claudeModel={claudeModel}
+              aiConfigured={aiConfigured}
+              aiModel={aiModel}
+              aiProvider={aiProvider}
               activeAdapters={activeAdapters}
             />
             <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
@@ -140,7 +143,7 @@ function ProposalList({ videoId }: { videoId: string }) {
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
               Source v{p.source_version_number} · {p.op_counts?.total} operations · {ADAPTERS[p.adapter as AdapterId]?.label ?? p.adapter} ·{" "}
-              {p.generator === "claude" ? "Claude" : "Offline draft (no AI)"} · {timeAgo(p.created_at)}
+              {p.generator === "gemini" ? "Gemini" : p.generator === "claude" ? "Claude" : "Offline draft (no AI)"} · {timeAgo(p.created_at)}
             </div>
             {p.summary && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{p.summary}</p>}
           </Link>
@@ -155,22 +158,24 @@ function AiReviewDialog({
   onOpenChange,
   ctx,
   videoId,
-  claudeConfigured,
-  claudeModel,
+  aiConfigured,
+  aiModel,
+  aiProvider,
   activeAdapters,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   ctx: WorkspaceContext;
   videoId: string;
-  claudeConfigured: boolean;
-  claudeModel: string;
+  aiConfigured: boolean;
+  aiModel: string;
+  aiProvider: "gemini" | "claude" | undefined;
   activeAdapters: string[];
 }) {
   const router = useRouter();
   const implemented = Object.values(ADAPTERS).filter((a) => a.implemented);
   const [adapter, setAdapter] = useState<AdapterId>(activeAdapters.includes("ffmpeg") ? "ffmpeg" : "manual");
-  const [mode, setMode] = useState<"claude" | "offline">(claudeConfigured ? "claude" : "offline");
+  const [mode, setMode] = useState<"ai" | "offline">(aiConfigured ? "ai" : "offline");
   const [busy, setBusy] = useState(false);
   const unresolved = ctx.comments.filter((c) => c.status === "open" && c.author_type !== "ai").length;
 
@@ -203,12 +208,14 @@ function AiReviewDialog({
         <div className="grid gap-4">
           <fieldset className="grid gap-2">
             <legend className="mb-1 text-xs font-medium text-muted-foreground">Analysis</legend>
-            <label className={`flex items-start gap-3 rounded-lg border p-3 ${!claudeConfigured ? "opacity-50" : "cursor-pointer"} ${mode === "claude" ? "border-primary/60 bg-primary/5" : ""}`}>
-              <input type="radio" name="mode" disabled={!claudeConfigured} checked={mode === "claude"} onChange={() => setMode("claude")} className="mt-1 accent-primary" />
+            <label className={`flex items-start gap-3 rounded-lg border p-3 ${!aiConfigured ? "opacity-50" : "cursor-pointer"} ${mode === "ai" ? "border-primary/60 bg-primary/5" : ""}`}>
+              <input type="radio" name="mode" disabled={!aiConfigured} checked={mode === "ai"} onChange={() => setMode("ai")} className="mt-1 accent-primary" />
               <div>
-                <div className="text-sm">Claude</div>
+                <div className="text-sm">{aiProvider === "gemini" ? "Gemini" : aiProvider === "claude" ? "Claude" : "AI provider"}</div>
                 <div className="text-xs text-muted-foreground">
-                  {claudeConfigured ? `Model ${claudeModel}. Interprets feedback, asks for clarification when ambiguous.` : "Not configured: set ANTHROPIC_API_KEY on the server."}
+                  {aiConfigured
+                    ? `Model ${aiModel}. Interprets feedback, asks for clarification when ambiguous.`
+                    : "Not configured: set GEMINI_API_KEY or ANTHROPIC_API_KEY on the server."}
                 </div>
               </div>
             </label>
@@ -245,7 +252,7 @@ function AiReviewDialog({
         <DialogFooter>
           <Button onClick={run} disabled={busy || unresolved === 0}>
             {busy ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {busy ? (mode === "claude" ? "Claude is analyzing…" : "Drafting…") : unresolved === 0 ? "No unresolved comments" : "Generate proposal"}
+            {busy ? (mode === "ai" ? `${aiProvider === "gemini" ? "Gemini" : "Claude"} is analyzing…` : "Drafting…") : unresolved === 0 ? "No unresolved comments" : "Generate proposal"}
           </Button>
         </DialogFooter>
       </DialogContent>

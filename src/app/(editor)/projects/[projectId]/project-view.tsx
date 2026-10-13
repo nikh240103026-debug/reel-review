@@ -75,7 +75,9 @@ export function ProjectView({
               <FilePickButton onFiles={(files) => files.forEach((f) => uploads.start(f, { projectId: project.id }))} />
             )}
             <DropdownMenu>
-              <DropdownMenuTrigger render={<Button variant="outline" size="icon" aria-label="Project actions" />}>
+              <DropdownMenuTrigger
+                render={<Button variant="outline" size="icon" aria-label="Project actions" />}
+              >
                 <MoreHorizontal />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -172,9 +174,12 @@ export function ProjectView({
                         <Button size="sm" variant="outline" onClick={() => setShareVideo(v.id)}>
                           <Share2 /> Share
                         </Button>
-                        <Button size="sm" variant="secondary" render={<Link href={`/videos/${v.id}`} />}>
+                        <Link
+                          href={`/videos/${v.id}`}
+                          className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-lg border border-transparent bg-secondary px-2.5 text-[0.8rem] font-medium whitespace-nowrap text-secondary-foreground transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                        >
                           Review
-                        </Button>
+                        </Link>
                       </div>
                     </li>
                   );

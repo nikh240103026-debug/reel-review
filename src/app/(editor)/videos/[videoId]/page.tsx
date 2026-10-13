@@ -23,8 +23,9 @@ export default async function EditorVideoPage({ params }: PageProps<"/videos/[vi
         videoId={videoId}
         projectId={video.project_id}
         projectName={video.project_name}
-        claudeConfigured={env.anthropicConfigured}
-        claudeModel={env.anthropicModel}
+        aiConfigured={env.aiConfigured}
+        aiModel={env.aiModel}
+        aiProvider={env.aiProvider}
         activeAdapters={[...new Set(devices.filter((d) => d.status === "active").flatMap((d) => d.adapters))]}
       />
     </Suspense>
