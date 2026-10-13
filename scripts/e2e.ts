@@ -27,6 +27,7 @@ const serverEnv: NodeJS.ProcessEnv = {
   PGLITE_DATA_DIR: path.join(tmp, "db"),
   LOCAL_STORAGE_DIR: path.join(tmp, "storage"),
   ANTHROPIC_API_KEY: "",
+  GEMINI_API_KEY: "",
   JOB_LEASE_SECONDS: "60",
 };
 
@@ -176,8 +177,8 @@ async function main() {
 
     // --- AI proposal + approval ---------------------------------------------
     cookie = saved;
-    const claudeCheck = await http("POST", `/api/editor/videos/${videoId}/ai-review`, { versionId: v1.id, adapter: "ffmpeg", mode: "claude" });
-    check(claudeCheck.status === 409 && /not configured/.test(claudeCheck.json.error), "Claude mode refuses honestly when no API key is configured");
+    const aiCheck = await http("POST", `/api/editor/videos/${videoId}/ai-review`, { versionId: v1.id, adapter: "ffmpeg", mode: "ai" });
+    check(aiCheck.status === 409 && /not configured/.test(aiCheck.json.error), "AI mode refuses honestly when no API key is configured");
     const gen = await http("POST", `/api/editor/videos/${videoId}/ai-review`, { versionId: v1.id, adapter: "ffmpeg", mode: "offline" });
     check(gen.status === 201, "offline draft proposal generated (labelled not-AI)");
     const pid = gen.json.proposalId as string;
