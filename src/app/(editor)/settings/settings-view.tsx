@@ -88,15 +88,16 @@ export function SettingsView({ status, devices: initialDevices }: { status: Syst
         )}
       </Section>
 
-      <Section title={<span className="flex items-center gap-2"><Bot className="size-4" /> Claude</span>}>
+      <Section title={<span className="flex items-center gap-2"><Bot className="size-4" /> AI provider</span>}>
         <div className="divide-y">
-          <Row label="API key">{status.claude.configured ? <StatusBadge status="ready" /> : <Pill tone="warning">Not configured</Pill>}</Row>
-          <Row label="Model">{status.claude.model}</Row>
-          <Row label="Effort">{status.claude.effort}</Row>
+          <Row label="Provider">{status.ai.provider === "gemini" ? "Google Gemini" : status.ai.provider === "claude" ? "Anthropic Claude" : <Pill tone="warning">Not configured</Pill>}</Row>
+          <Row label="API key">{status.ai.configured ? <StatusBadge status="ready" /> : <Pill tone="warning">Not configured</Pill>}</Row>
+          <Row label="Model">{status.ai.model ?? "—"}</Row>
+          <Row label="Effort">{status.ai.effort}</Row>
           <Row label="Frame stills for context">{status.media.ffmpeg ? "Enabled (server ffmpeg found)" : "Unavailable (no ffmpeg on server)"}</Row>
         </div>
-        {!status.claude.configured && (
-          <p className="border-t px-4 py-2.5 text-xs text-muted-foreground">Without a key, AI Review can only produce clearly labelled offline drafts (no AI).</p>
+        {!status.ai.configured && (
+          <p className="border-t px-4 py-2.5 text-xs text-muted-foreground">Set GEMINI_API_KEY or ANTHROPIC_API_KEY on the server to enable AI Review; without a key, it can only produce clearly labelled offline drafts.</p>
         )}
       </Section>
 

@@ -15,4 +15,5 @@ Object.assign(process.env, {
 });
 delete process.env.DATABASE_URL;
 delete process.env.ANTHROPIC_API_KEY;
+delete process.env.GEMINI_API_KEY;
 delete process.env.ANTHROPIC_AUTH_TOKEN;
