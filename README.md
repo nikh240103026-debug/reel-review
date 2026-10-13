@@ -83,8 +83,10 @@ if its billing setup works for you.
    public URL, PostgreSQL, or S3-compatible storage configuration instead of
    silently using localhost links or ephemeral local storage.
 
-Add `ANTHROPIC_API_KEY` in Vercel only if Claude-powered review is required;
-without it, the app uses its labelled offline draft mode. See `.env.example`
+Add `GEMINI_API_KEY` for Gemini-powered review, or `ANTHROPIC_API_KEY` for
+Claude-powered review. If both are set, Gemini is used. Without either key,
+the app uses its labelled offline draft mode. Set `GEMINI_MODEL` or
+`ANTHROPIC_MODEL` to override the provider's default model. See `.env.example`
 for optional settings.
 
 ### Local editing agent and native-editor review
