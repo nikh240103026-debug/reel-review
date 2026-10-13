@@ -156,7 +156,7 @@ export const ADAPTERS: Record<AdapterId, AdapterInfo> = {
   premiere_pro: {
     id: "premiere_pro",
     label: "Premiere Pro (FFmpeg render + review)",
-    implemented: true,
+    implemented: false,
     automated: true,
     supportedOps: ["clip_trim", "audio_gain", "text_overlay_add"],
     summary: "Renders approved flattened-video edits with FFmpeg, then opens the new render in Premiere Pro for human review.",

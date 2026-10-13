@@ -171,7 +171,7 @@ export interface ProposalDTO {
   supersedes_id: string | null;
   status: ProposalStatus;
   adapter: string;
-  generator: "claude" | "offline_rules";
+  generator: "claude" | "gemini" | "offline_rules";
   model: string | null;
   summary: string | null;
   comment_coverage: CommentCoverage[];
