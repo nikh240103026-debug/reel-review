@@ -2,7 +2,7 @@ import { z } from "zod";
 import { OP_TYPES, POSITIONS, type OpType } from "@/shared/operations";
 
 /**
- * The "wire" schema Claude must return (enforced by structured outputs).
+ * The "wire" schema an AI provider must return (enforced by structured outputs).
  * It is intentionally loose on numeric ranges: range/domain checks happen in
  * our own validation so that an out-of-range value marks one operation
  * invalid (visible to the editor) instead of discarding the whole proposal.

@@ -3,7 +3,7 @@ import type { WireProposalT } from "./schema";
 
 /**
  * OFFLINE DRAFT MODE — NOT AI.
- * Used only when the editor explicitly chooses it (e.g. no Claude API key).
+ * Used only when the editor explicitly chooses it (e.g. no AI provider key).
  * Each actionable comment becomes a manual_instruction that quotes the
  * comment verbatim. No interpretation, no layer identification, no guessing.
  */

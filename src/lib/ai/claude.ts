@@ -1,33 +1,21 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
+import { AiError } from "./errors";
+import type { AnalysisResult } from "./types";
 import { env } from "@/lib/env";
 import { log } from "@/lib/log";
 import { SYSTEM_PROMPT, buildUserPrompt, type ReviewInput } from "./prompt";
 import { WireProposal, type WireProposalT } from "./schema";
 
-export class AiError extends Error {
-  constructor(
-    message: string,
-    public retryable = false,
-  ) {
-    super(message);
-  }
-}
-
-export interface ClaudeResult {
-  proposal: WireProposalT;
-  model: string;
-  usage: { input_tokens: number; output_tokens: number };
-  stop_reason: string | null;
-}
+export { AiError } from "./errors";
 
 /**
  * Calls Claude with structured outputs. The response is constrained to the
  * WireProposal JSON schema and validated again by the SDK's Zod parser.
  * Refusal fallbacks are enabled ("default" server-side routing).
  */
-export async function analyzeWithClaude(input: ReviewInput, frames: { mediaType: "image/jpeg"; data: string }[]): Promise<ClaudeResult> {
+export async function analyzeWithClaude(input: ReviewInput, frames: { mediaType: "image/jpeg"; data: string }[]): Promise<AnalysisResult> {
   if (!env.anthropicConfigured) throw new AiError("ANTHROPIC_API_KEY is not configured");
   const client = new Anthropic({ maxRetries: 2, timeout: 5 * 60 * 1000 });
 

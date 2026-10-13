@@ -7,7 +7,7 @@ import { generateProposal } from "@/lib/services/proposals";
 const Body = z.object({
   versionId: z.string().uuid(),
   adapter: z.string().min(1).max(40),
-  mode: z.enum(["claude", "offline"]),
+  mode: z.enum(["ai", "offline"]),
 });
 
 /** Analyzes unresolved comments on one version and creates a proposal awaiting approval. Executes nothing. */
