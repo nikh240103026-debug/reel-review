@@ -26,7 +26,8 @@ EDITOR_DISPLAY_NAME=Editor
 # S3_ACCESS_KEY_ID=
 # S3_SECRET_ACCESS_KEY=
 
-# ANTHROPIC_API_KEY=
+# GEMINI_API_KEY=
+# GEMINI_MODEL=gemini-2.5-flash
 `;
 fs.writeFileSync(target, content, { mode: 0o600 });
 console.log(`Created ${target}.`);

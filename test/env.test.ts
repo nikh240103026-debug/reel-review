@@ -18,6 +18,24 @@ describe("environment configuration", () => {
     expect(env.appUrl).toBe("http://localhost:3000");
   });
 
+  it("prefers Gemini when both AI provider keys are configured", () => {
+    vi.stubEnv("GEMINI_API_KEY", "gemini-test-key");
+    vi.stubEnv("GEMINI_MODEL", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-test-key");
+
+    expect(env.aiProvider).toBe("gemini");
+    expect(env.aiConfigured).toBe(true);
+    expect(env.aiModel).toBe("gemini-2.5-flash");
+  });
+
+  it("keeps Claude available when Gemini is not configured", () => {
+    vi.stubEnv("GEMINI_API_KEY", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-test-key");
+
+    expect(env.aiProvider).toBe("claude");
+    expect(env.aiModel).toBe(env.anthropicModel);
+  });
+
   it("requires durable database and object storage on Vercel production", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL", "1");

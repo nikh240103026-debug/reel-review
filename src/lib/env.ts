@@ -120,6 +120,23 @@ export const env = {
   get anthropicConfigured(): boolean {
     return Boolean(str("ANTHROPIC_API_KEY") || str("ANTHROPIC_AUTH_TOKEN"));
   },
+  get aiProvider(): "gemini" | "claude" | undefined {
+    if (str("GEMINI_API_KEY")) return "gemini";
+    if (this.anthropicConfigured) return "claude";
+    return undefined;
+  },
+  get geminiApiKey(): string | undefined {
+    return str("GEMINI_API_KEY");
+  },
+  get geminiModel(): string {
+    return str("GEMINI_MODEL") ?? "gemini-2.5-flash";
+  },
+  get aiConfigured(): boolean {
+    return Boolean(this.aiProvider);
+  },
+  get aiModel(): string {
+    return this.aiProvider === "gemini" ? this.geminiModel : this.anthropicModel;
+  },
   get anthropicModel(): string {
     return str("ANTHROPIC_MODEL") ?? "claude-opus-5-5";
   },
