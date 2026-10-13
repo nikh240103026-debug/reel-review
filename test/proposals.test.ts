@@ -28,6 +28,14 @@ vi.mock("@/lib/ai/claude", () => ({
     stop_reason: "end_turn",
   })),
 }));
+vi.mock("@/lib/ai/gemini", () => ({
+  analyzeWithGemini: vi.fn(async (input: { comments: { id: string }[] }) => ({
+    proposal: mockState.next!(input.comments.map((c) => c.id)),
+    model: "gemini-2.5-flash",
+    usage: { input_tokens: 1, output_tokens: 1 },
+    stop_reason: "STOP",
+  })),
+}));
 
 async function expectHttp(p: Promise<unknown>, status: number) {
   const err = await p.then(
@@ -57,6 +65,23 @@ describe("AI proposals and approval", () => {
     const fmt = betaZodOutputFormat(WireProposal);
     expect(fmt.type).toBe("json_schema");
     expect(JSON.stringify(fmt.schema)).toContain("operation_type");
+  });
+
+  it("uses Gemini when GEMINI_API_KEY is set and records the provider", async () => {
+    process.env.GEMINI_API_KEY = "test-gemini-key-not-used";
+    mockState.next = (ids) => ({
+      summary: "Gemini draft",
+      operations: [],
+      comment_coverage: ids.map((comment_id) => ({ comment_id, status: "not_actionable", note: "No operation proposed." })),
+    });
+    try {
+      const id = await generateProposal(videoId, { versionId, adapter: "ffmpeg", mode: "ai" }, EDITOR);
+      const { proposal } = await getProposal(id);
+      expect(proposal.generator).toBe("gemini");
+      expect(proposal.model).toBe("gemini-2.5-flash");
+    } finally {
+      delete process.env.GEMINI_API_KEY;
+    }
   });
 
   it("(9)(13) validates Claude output: valid, ambiguous, unsupported and out-of-range operations are labelled", async () => {
@@ -95,7 +120,7 @@ describe("AI proposals and approval", () => {
         { comment_id: vague, status: "needs_clarification", note: "Vague" },
       ],
     });
-    const id = await generateProposal(videoId, { versionId, adapter: "ffmpeg", mode: "claude" }, EDITOR);
+    const id = await generateProposal(videoId, { versionId, adapter: "ffmpeg", mode: "ai" }, EDITOR);
     const { proposal, history } = await getProposal(id);
     const by = Object.fromEntries(proposal.operations!.map((o) => [o.op_key, o]));
     expect(proposal.generator).toBe("claude");
@@ -139,7 +164,7 @@ describe("AI proposals and approval", () => {
       ],
       comment_coverage: [{ comment_id: music, status: "addressed", note: "" }],
     });
-    const id = await generateProposal(videoId, { versionId, adapter: "ffmpeg", mode: "claude" }, EDITOR);
+    const id = await generateProposal(videoId, { versionId, adapter: "ffmpeg", mode: "ai" }, EDITOR);
     let { proposal } = await getProposal(id);
     expect(proposal.status).toBe("awaiting_approval");
     const [a, b] = proposal.operations!;

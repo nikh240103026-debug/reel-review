@@ -43,7 +43,9 @@ export default async function ProposalsPage() {
                 {p.op_counts?.approved}/{p.op_counts?.total} approved
               </td>
               <td className="px-4 py-2.5 text-xs">{ADAPTERS[p.adapter as AdapterId]?.label ?? p.adapter}</td>
-              <td className="px-4 py-2.5 text-xs">{p.generator === "claude" ? "Claude" : <Pill tone="warning">Offline · not AI</Pill>}</td>
+              <td className="px-4 py-2.5 text-xs">
+                {p.generator === "gemini" ? "Gemini" : p.generator === "claude" ? "Claude" : <Pill tone="warning">Offline · not AI</Pill>}
+              </td>
               <td className="px-4 py-2.5">
                 <StatusBadge status={p.status} />
               </td>

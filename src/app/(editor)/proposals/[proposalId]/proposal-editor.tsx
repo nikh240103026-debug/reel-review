@@ -108,9 +108,9 @@ export function ProposalEditor({ initial, devices }: { initial: ProposalData; de
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span>Source v{p.source_version_number}</span>
             <span className="inline-flex items-center gap-1">
-              {p.generator === "claude" ? (
+              {p.generator === "gemini" || p.generator === "claude" ? (
                 <>
-                  <Bot className="size-3.5 text-ai" /> Claude · {p.model}
+                  <Bot className="size-3.5 text-ai" /> {p.generator === "gemini" ? "Gemini" : "Claude"} · {p.model}
                 </>
               ) : (
                 <Pill tone="warning">Offline draft · not AI</Pill>

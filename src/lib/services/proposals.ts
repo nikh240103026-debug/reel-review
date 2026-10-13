@@ -5,7 +5,9 @@ import { env } from "@/lib/env";
 import { HttpError, badRequest, conflict, notFound } from "@/lib/http";
 import { log } from "@/lib/log";
 import { getStorage } from "@/lib/storage";
-import { analyzeWithClaude, AiError } from "@/lib/ai/claude";
+import { analyzeWithClaude } from "@/lib/ai/claude";
+import { analyzeWithGemini } from "@/lib/ai/gemini";
+import { AiError } from "@/lib/ai/errors";
 import { offlineDraft } from "@/lib/ai/offline";
 import { describeAnnotation, type ReviewComment, type ReviewInput } from "@/lib/ai/prompt";
 import type { WireOperationT, WireProposalT } from "@/lib/ai/schema";
@@ -202,7 +204,7 @@ async function buildReviewInput(versionId: string, adapter: AdapterId) {
 
 export async function generateProposal(
   videoId: string,
-  opts: { versionId: string; adapter: string; mode: "claude" | "offline" },
+  opts: { versionId: string; adapter: string; mode: "ai" | "offline" },
   actor: string,
 ): Promise<string> {
   if (!isAdapterId(opts.adapter) || !ADAPTERS[opts.adapter].implemented) {
@@ -215,11 +217,14 @@ export async function generateProposal(
 
   let wire: WireProposalT;
   let model: string | null = null;
+  let generator: "claude" | "gemini" | "offline_rules" = "offline_rules";
   let raw: unknown = null;
-  if (opts.mode === "claude") {
-    if (!env.anthropicConfigured) {
-      throw conflict("Claude is not configured (ANTHROPIC_API_KEY missing). Use the offline draft or add a key.");
+  if (opts.mode === "ai") {
+    const provider = env.aiProvider;
+    if (!provider) {
+      throw conflict("AI is not configured (GEMINI_API_KEY or ANTHROPIC_API_KEY missing). Use the offline draft or add a key.");
     }
+    generator = provider;
     // Attach stills at comment timestamps when the server has ffmpeg.
     const frames: { mediaType: "image/jpeg"; data: string }[] = [];
     const source = await getStorage().localPathOrUrl(ctx.storage_key);
@@ -232,7 +237,9 @@ export async function generateProposal(
       }
     }
     try {
-      const res = await analyzeWithClaude(input, frames);
+      const res = provider === "gemini"
+        ? await analyzeWithGemini(input, frames)
+        : await analyzeWithClaude(input, frames);
       wire = res.proposal;
       model = res.model;
       raw = { proposal: res.proposal, usage: res.usage, stop_reason: res.stop_reason };
@@ -259,7 +266,7 @@ export async function generateProposal(
         videoId,
         opts.versionId,
         adapter,
-        opts.mode === "claude" ? "claude" : "offline_rules",
+        generator,
         model,
         wire.summary.slice(0, 4000),
         JSON.stringify(wire.comment_coverage.filter((c) => knownIds.has(c.comment_id))),
@@ -272,8 +279,8 @@ export async function generateProposal(
     await recordActivity(q, {
       projectId: ctx.project_id,
       videoId,
-      actorType: opts.mode === "claude" ? "ai" : "system",
-      actorName: opts.mode === "claude" ? `Claude (${model})` : "Offline draft (no AI)",
+      actorType: opts.mode === "ai" ? "ai" : "system",
+      actorName: opts.mode === "ai" ? `${generator === "gemini" ? "Gemini" : "Claude"} (${model})` : "Offline draft (no AI)",
       eventType: "proposal.created",
       data: { proposal_id: id, operations: wire.operations.length, requested_by: actor, status: "draft" },
     });
