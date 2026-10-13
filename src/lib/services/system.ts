@@ -8,7 +8,7 @@ import { isFfmpegAvailable } from "./frames";
 export interface SystemStatus {
   database: { driver: "postgres" | "pglite"; ok: boolean; mode: "production" | "local_dev"; error?: string };
   storage: { driver: "s3" | "local"; description: string; ok: boolean | null; error?: string; mode: "production" | "local_dev" };
-  claude: { configured: boolean; model: string; effort: string };
+  ai: { configured: boolean; provider: "gemini" | "claude" | null; model: string | null; effort: string };
   media: { ffprobe: boolean; ffmpeg: boolean };
   security: { appUrl: string; secureCookies: boolean; editorKeyConfigured: boolean; signedUrlTtlSeconds: number };
 }
@@ -52,7 +52,7 @@ export async function getSystemStatus(opts: { probeStorage?: boolean } = {}): Pr
   return {
     database,
     storage,
-    claude: { configured: env.anthropicConfigured, model: env.anthropicModel, effort: env.aiEffort },
+    ai: { configured: env.aiConfigured, provider: env.aiProvider ?? null, model: env.aiConfigured ? env.aiModel : null, effort: env.aiEffort },
     media: { ffprobe: await isFfprobeAvailable(), ffmpeg: await isFfmpegAvailable() },
     security: {
       appUrl: env.appUrl,

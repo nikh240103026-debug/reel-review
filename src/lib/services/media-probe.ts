@@ -33,13 +33,23 @@ function run(bin: string, args: string[], timeoutMs: number): Promise<{ code: nu
     const timer = setTimeout(() => child.kill("SIGKILL"), timeoutMs);
     child.stdout.on("data", (d) => (stdout += d));
     child.stderr.on("data", (d) => (stderr += d));
-    child.on("error", () => {
+    child.on("error", (err) => {
       clearTimeout(timer);
-      resolve({ code: -1, stdout, stderr: "spawn error" });
+      resolve({
+        code: -1,
+        stdout,
+        stderr: `spawn error: ${err.message}`,
+      });
     });
-    child.on("close", (code) => {
+    child.on("close", (code, signal) => {
       clearTimeout(timer);
-      resolve({ code, stdout, stderr });
+      resolve({
+        code,
+        stdout,
+        stderr: signal
+          ? `${stderr}\nProcess terminated by signal: ${signal}`
+          : stderr,
+      });
     });
   });
 }
